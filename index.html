@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kanban Board - Task Management Application</title>
+  <meta name="description" content="A clean, responsive, Vanilla JavaScript Kanban Board with native HTML5 Drag and Drop and localStorage persistence.">
+  <meta property="og:title" content="Kanban Board - Task Management Application">
+  <meta property="og:description" content="A clean, responsive, Vanilla JavaScript Kanban Board with native HTML5 Drag and Drop and localStorage persistence.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+  <!-- Application Header -->
+  <header class="app-header">
+    <div class="header-content">
+      <div class="brand-wrapper">
+        <div class="brand-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="3" ry="3"></rect>
+            <line x1="9" y1="3" x2="9" y2="21"></line>
+            <line x1="15" y1="3" x2="15" y2="21"></line>
+          </svg>
+        </div>
+        <div>
+          <h1 class="app-title">Kanban Board</h1>
+          <p class="app-subtitle">Track, organize, and manage your tasks effortlessly</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="board-stats" aria-label="Board task statistics">
+          <span>Total: <strong id="stat-total" class="stat-pill">0</strong></span>
+          <span>•</span>
+          <span>Done: <strong id="stat-completed" class="stat-pill">0</strong></span>
+        </div>
+        <button type="button" id="btn-reset-demo" class="btn-secondary" title="Restore sample tasks">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+            <path d="M21 3v5h-5"></path>
+            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+            <path d="M3 21v-5h5"></path>
+          </svg>
+          Reset Demo
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="main-wrapper">
+
+    <!-- Add Task Section -->
+    <section class="add-task-section" aria-labelledby="add-task-heading">
+      <div class="section-header">
+        <h2 id="add-task-heading" class="section-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Add New Task
+        </h2>
+      </div>
+
+      <form id="task-form" class="task-form" novalidate>
+        <div class="form-row">
+          <div class="input-group">
+            <label for="task-title-input" class="input-label">
+              Task Title <span class="required" aria-hidden="true">*</span>
+            </label>
+            <input
+              type="text"
+              id="task-title-input"
+              class="form-control"
+              placeholder="e.g., Conduct user research"
+              maxlength="120"
+              autocomplete="off"
+              required
+            >
+          </div>
+
+          <div class="input-group">
+            <label for="task-desc-input" class="input-label">
+              Description <span style="font-weight: 400; color: var(--text-light);">(Optional)</span>
+            </label>
+            <textarea
+              id="task-desc-input"
+              class="form-control"
+              placeholder="Add details, links, or acceptance criteria..."
+              rows="1"
+              maxlength="300"
+            ></textarea>
+          </div>
+
+          <button type="submit" id="add-task-btn" class="btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add Task
+          </button>
+        </div>
+
+        <div id="form-feedback" class="form-feedback" role="alert" aria-live="polite"></div>
+      </form>
+    </section>
+
+    <!-- Kanban Board Columns -->
+    <div class="board-columns" id="kanban-board">
+
+      <!-- Column 1: To-Do -->
+      <section class="column" data-status="todo" aria-labelledby="col-todo-heading">
+        <header class="column-header">
+          <div class="column-title-wrap">
+            <span class="column-badge-dot" aria-hidden="true"></span>
+            <h2 id="col-todo-heading" class="column-title">To-Do</h2>
+          </div>
+          <span class="column-count" id="count-todo" aria-label="0 tasks in To-Do">0</span>
+        </header>
+        <div
+          class="task-list"
+          id="list-todo"
+          data-status="todo"
+          role="region"
+          aria-label="To-Do task drop zone"
+        >
+          <!-- Tasks injected via JavaScript -->
+        </div>
+      </section>
+
+      <!-- Column 2: Doing -->
+      <section class="column" data-status="doing" aria-labelledby="col-doing-heading">
+        <header class="column-header">
+          <div class="column-title-wrap">
+            <span class="column-badge-dot" aria-hidden="true"></span>
+            <h2 id="col-doing-heading" class="column-title">Doing</h2>
+          </div>
+          <span class="column-count" id="count-doing" aria-label="0 tasks in Doing">0</span>
+        </header>
+        <div
+          class="task-list"
+          id="list-doing"
+          data-status="doing"
+          role="region"
+          aria-label="Doing task drop zone"
+        >
+          <!-- Tasks injected via JavaScript -->
+        </div>
+      </section>
+
+      <!-- Column 3: Done -->
+      <section class="column" data-status="done" aria-labelledby="col-done-heading">
+        <header class="column-header">
+          <div class="column-title-wrap">
+            <span class="column-badge-dot" aria-hidden="true"></span>
+            <h2 id="col-done-heading" class="column-title">Done</h2>
+          </div>
+          <span class="column-count" id="count-done" aria-label="0 tasks in Done">0</span>
+        </header>
+        <div
+          class="task-list"
+          id="list-done"
+          data-status="done"
+          role="region"
+          aria-label="Done task drop zone"
+        >
+          <!-- Tasks injected via JavaScript -->
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Delete Confirmation Modal Dialog -->
+  <div id="delete-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-desc">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-icon-danger" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+          </svg>
+        </div>
+        <h3 id="modal-title" class="modal-title">Delete Task</h3>
+      </div>
+      <div class="modal-body" id="modal-desc">
+        Are you sure you want to permanently delete this task?
+        <div id="modal-task-name" class="modal-task-highlight"></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="btn-cancel-delete" class="btn-modal-cancel">Cancel</button>
+        <button type="button" id="btn-confirm-delete" class="btn-modal-delete">Delete Task</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container for Notifications -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Vanilla JavaScript Application Logic -->
+  <script src="./script.js"></script>
+</body>
+</html>

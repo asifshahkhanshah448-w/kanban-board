@@ -1,0 +1,6 @@
+{
+  "name": "Kanban Board",
+  "description": "A clean, responsive, Vanilla JavaScript Kanban Board with native HTML5 Drag and Drop and localStorage persistence.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
